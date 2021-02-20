@@ -6,6 +6,7 @@ import guimonitor
 import time
 import directinput
 import numpy as np
+import random
 
 
 YOLO_CONFIG_PATH = 'models/custom-yolov4-detector.cfg'
@@ -13,6 +14,7 @@ YOLO_WEIGHTS_PATH = 'models/yolov4_best_416.weights'
 WINDOW_NAME = 'Moonlight' #'LOST ARK (64-bit) v.2.3.1.1' #'Moonlight'
 
 DEBUG = False
+#Detection config
 confidence_threshold = 0.45
 overlap_threshold = 0.3
 fish_active_threshold = 0.9
@@ -44,6 +46,8 @@ fed_time = 0
 fishing_in_progress = False
 throw_time = 0
 can_catch = True #Flag for missing catch. For first throw must be True
+miss_count = 0
+skip_percent = 3 # skip catch if value < fail_percent
 
 def debug():
     detectResult = detect.detect_with_boxes(cropped_screenshot, confidence_threshold, overlap_threshold)
@@ -78,36 +82,55 @@ try:
                         feed_time_passed = time_now - fed_time
                         print ("Last feed: " + time.strftime("%Mm %Ss", time.gmtime(feed_time_passed)) + " ago")
                         if feed_time_passed > 915:
-                            print('Feed')
-                            directinput.press_r()
-                            sleep(3)
+                            print('Feed disabled')
+                            #directinput.press_r()
+                            #sleep(3)
                             fed_time = time_now
 
                         if can_catch:
                             print('Throw')
                             directinput.press_e()
                             can_catch = False
-                            sleep(2)
+                            sleep(3)
                         else:
-                            print("Missed :(")
+                            miss_count += 1
+                            print("Missed! Miss count: " + str(miss_count)) #possible bot detection
+                            
+                            if miss_count > 3:
+                                raise Exception("Too much misses")
+
                             can_catch = True
-                            sleep(6)
-                    else:
-                        print("Fishing rod broken or no energy...")
+                            seed = random.Random.randrange(2000) / 1000
+                            sleep_time = 5.5 + seed
+                            sleep(sleep_time)
+                            print("Sleep time: " + str(sleep_time))
+                    elif broken_rod:
+                        print("Fishing rod broken...")
                         can_catch = True
                         sleep(5)
+                    else:
+                        raise Exception("Not enough energy. Fishing will be stopped.")
                 else:
                     detect_result = detect.detect_with_confidence(cropped_screenshot, confidence_threshold)
                     if detect_result:
-                        print('Catch!')
-                        directinput.press_e()
-                        can_catch = True
-                        sleep(6)
+                        seed = random.Random.randrange(2000) / 1000
+
+                        if seed < skip_percent * 0.02: #Reducing number of success to avoid bot detection
+                            print("Skip")
+                            if miss_count >= 0: #Skip will increase miss count thus miss_count must be reduced
+                                miss_count -= 1
+                        else:
+                            print('Catch!')
+                            directinput.press_e()
+                            can_catch = True
+                            sleep_time = 5.5 + seed
+                            sleep(sleep_time)
+                            print("Sleep time: " + str(sleep_time))
 
 except KeyboardInterrupt:
     print ("User interrupt")
 except Exception as ex:
-    print("Error: " + str(ex))
+    print("Warning: " + str(ex))
 finally:
     wincap.stop()
     if DEBUG:
