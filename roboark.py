@@ -47,7 +47,7 @@ fishing_in_progress = False
 throw_time = 0
 can_catch = True #Flag for missing catch. For first throw must be True
 miss_count = 0
-skip_percent = 3 # skip catch if value < fail_percent
+skip_percent = 4 # skip catch if value < fail_percent
 
 def debug():
     detectResult = detect.detect_with_boxes(cropped_screenshot, confidence_threshold, overlap_threshold)
