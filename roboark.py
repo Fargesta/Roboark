@@ -100,8 +100,8 @@ try:
                                 raise Exception("Too much misses")
 
                             can_catch = True
-                            seed = random.Random.randrange(2000) / 1000
-                            sleep_time = 5.5 + seed
+                            seed = random.randrange(0, 2000) / 1000
+                            sleep_time = 5.7 + seed
                             sleep(sleep_time)
                             print("Sleep time: " + str(sleep_time))
                     elif broken_rod:
@@ -109,11 +109,16 @@ try:
                         can_catch = True
                         sleep(5)
                     else:
-                        raise Exception("Not enough energy. Fishing will be stopped.")
+                        print("Skill disabled")
+                        sleep(10)
+                        check_ready = guimonitor.match_template_ccoeff(skillbox, fish_ready_template)
+                        check_fish = skill_ready > fish_ready_threshold
+                        if not check_fish: # recheck skill status could be wrong detection
+                            raise Exception("Not enough energy. Fishing will be stopped.")
                 else:
                     detect_result = detect.detect_with_confidence(cropped_screenshot, confidence_threshold)
                     if detect_result:
-                        seed = random.Random.randrange(2000) / 1000
+                        seed = random.randrange(0, 2000) / 1000
 
                         if seed < skip_percent * 0.02: #Reducing number of success to avoid bot detection
                             print("Skip")
@@ -123,7 +128,7 @@ try:
                             print('Catch!')
                             directinput.press_e()
                             can_catch = True
-                            sleep_time = 5.5 + seed
+                            sleep_time = 5.7 + seed
                             sleep(sleep_time)
                             print("Sleep time: " + str(sleep_time))
 
