@@ -47,7 +47,7 @@ fishing_in_progress = False
 throw_time = 0
 can_catch = True #Flag for missing catch. For first throw must be True
 miss_count = 0
-skip_percent = 4 # skip catch if value < fail_percent
+skip_percent = 5 # skip catch if value < fail_percent
 
 def debug():
     detectResult = detect.detect_with_boxes(cropped_screenshot, confidence_threshold, overlap_threshold)
@@ -109,11 +109,13 @@ try:
                         can_catch = True
                         sleep(5)
                     else:
-                        print("Skill disabled")
-                        sleep(10)
+                        print("Skill disabled. Confidence: " + str(fishing_skill_active))
+                        seed = random.randrange(0, 100) / 10
+                        sleep(7 + seed)
                         check_ready = guimonitor.match_template_ccoeff(skillbox, fish_ready_template)
-                        check_fish = skill_ready > fish_ready_threshold
+                        check_fish = check_ready > fish_ready_threshold
                         if not check_fish: # recheck skill status could be wrong detection
+                            print("Second check. Confidence: " + str(check_ready))
                             raise Exception("Not enough energy. Fishing will be stopped.")
                 else:
                     detect_result = detect.detect_with_confidence(cropped_screenshot, confidence_threshold)
