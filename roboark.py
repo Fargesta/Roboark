@@ -31,8 +31,8 @@ net.setPreferableTarget(cv.dnn.DNN_TARGET_CUDA)
 with open('models/classes.names', 'r', encoding='utf-8') as target:
     labels = target.read().strip().split('\n')
 
-fish_active_template = cv.imread('images/fish_skill_active_pattern.jpg')
-fish_ready_template = cv.imread('images/fish_skill_ready_pattern.jpg')
+fish_active_template = cv.imread('images/fish_skill_active_pattern_E.jpg')
+fish_ready_template = cv.imread('images/fish_skill_ready_pattern_R.jpg')
 rod_template = cv.imread('images/broken_rod.png', 0)
 
 wincap = WindowCapture(WINDOW_NAME)
@@ -47,7 +47,7 @@ fishing_in_progress = False
 throw_time = 0
 can_catch = True #Flag for missing catch. For first throw must be True
 miss_count = 0
-skip_percent = 5 # skip catch if value < fail_percent
+skip_percent = 7 # skip catch if value < fail_percent
 
 def debug():
     detectResult = detect.detect_with_boxes(cropped_screenshot, confidence_threshold, overlap_threshold)
@@ -71,7 +71,10 @@ try:
             fishing_in_progress = fishing_skill_active > fish_active_threshold
 
             if DEBUG:
-                debug()
+                guimonitor.save_image(full_size_screenshot)
+                cv.imshow("skills", skillbox)
+                cv.waitKey(0)
+                #debug()
             else:
                 if not fishing_in_progress:
                     broken_rod = guimonitor.is_rod_broken(full_size_screenshot)
@@ -89,7 +92,7 @@ try:
 
                         if can_catch:
                             print('Throw')
-                            directinput.press_e()
+                            directinput.press_r()
                             can_catch = False
                             sleep(3)
                         else:
@@ -110,12 +113,19 @@ try:
                         sleep(5)
                     else:
                         print("Skill disabled. Confidence: " + str(fishing_skill_active))
-                        seed = random.randrange(0, 100) / 10
-                        sleep(7 + seed)
-                        check_ready = guimonitor.match_template_ccoeff(skillbox, fish_ready_template)
-                        check_fish = check_ready > fish_ready_threshold
-                        if not check_fish: # recheck skill status could be wrong detection
-                            print("Second check. Confidence: " + str(check_ready))
+                        check_fish = False
+
+                        # recheck skill status. Could be wrong detection
+                        for i in range(5):
+                            seed = random.randrange(0, 100) / 10
+                            sleep(7 + seed)
+                            check_ready = guimonitor.match_template_ccoeff(skillbox, fish_ready_template)
+                            check_fish = (check_ready > fish_ready_threshold) or check_fish
+                            print("Check confidence: " + str(check_ready))
+                            if check_fish:
+                                break
+
+                        if not check_fish:
                             raise Exception("Not enough energy. Fishing will be stopped.")
                 else:
                     detect_result = detect.detect_with_confidence(cropped_screenshot, confidence_threshold)
@@ -128,7 +138,7 @@ try:
                                 miss_count -= 1
                         else:
                             print('Catch!')
-                            directinput.press_e()
+                            directinput.press_r()
                             can_catch = True
                             sleep_time = 5.7 + seed
                             sleep(sleep_time)
