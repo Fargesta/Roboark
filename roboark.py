@@ -119,11 +119,12 @@ try:
                         for i in range(5):
                             seed = random.randrange(0, 100) / 10
                             sleep(7 + seed)
-                            check_ready = guimonitor.match_template_ccoeff(skillbox, fish_ready_template)
+                            check_ready = guimonitor.match_template_ccoeff(wincap.skillBox, fish_ready_template)
                             check_fish = (check_ready > fish_ready_threshold) or check_fish
                             print("Check confidence: " + str(check_ready))
                             if check_fish:
                                 break
+                            check_ready = 0
 
                         if not check_fish:
                             raise Exception("Not enough energy. Fishing will be stopped.")
@@ -140,9 +141,10 @@ try:
                             print('Catch!')
                             directinput.press_r()
                             can_catch = True
-                            sleep_time = 5.7 + seed
-                            sleep(sleep_time)
-                            print("Sleep time: " + str(sleep_time))
+                            
+                        sleep_time = 5.7 + seed
+                        sleep(sleep_time)
+                        print("Sleep time: " + str(sleep_time))
 
 except KeyboardInterrupt:
     print ("User interrupt")
