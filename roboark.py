@@ -141,7 +141,6 @@ try:
                             print('Catch!')
                             directinput.press_r()
                             can_catch = True
-                            miss_count = 0
                             
                         sleep_time = 5.7 + seed
                         sleep(sleep_time)
