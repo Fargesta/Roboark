@@ -116,7 +116,7 @@ try:
                         check_fish = False
 
                         # recheck skill status. Could be wrong detection
-                        for i in range(5):
+                        for i in range(3):
                             seed = random.randrange(0, 100) / 10
                             sleep(7 + seed)
                             check_ready = guimonitor.match_template_ccoeff(wincap.skillBox, fish_ready_template)
@@ -141,6 +141,7 @@ try:
                             print('Catch!')
                             directinput.press_r()
                             can_catch = True
+                            miss_count = 0
                             
                         sleep_time = 5.7 + seed
                         sleep(sleep_time)
